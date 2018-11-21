@@ -3,6 +3,7 @@ package Autotests;
 import Autotests.pages.CatalogPage;
 import Autotests.pages.HomePage;
 import Autotests.pages.LoginPage;
+import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -49,17 +50,15 @@ public class FirstTest {
     public static void setup() {
         InitConfig configs = new InitConfig();
         System.setProperty("webdriver." + configs.browserName +".driver", configs.driverPath);
-        if ("Opera".equalsIgnoreCase(configs.browserName))
-            driver = new OperaDriver();
-        else if("ie".equalsIgnoreCase(configs.browserName))
+        if("ie".equalsIgnoreCase(configs.browserName))
             driver = new InternetExplorerDriver();
-        else if("Firefox".equalsIgnoreCase(configs.browserName))
+        else if("gecko".equalsIgnoreCase(configs.browserName))
             driver = new FirefoxDriver();
         else
             driver = new ChromeDriver();
 
-        driver.manage().window().maximize();
-        driver.manage().timeouts().implicitlyWait(10, SECONDS);
+        driver.manage().window().maximize(); //передаю веб-драйверу набор методов, для того чтобы ход теста отображался в полностью открытом окне:
+        driver.manage().timeouts().implicitlyWait(10, SECONDS); // неявное ожидание Implicit Wait, которое задается вначале теста и будет работать при каждом вызове метода поиска элемента:
         driver.get(configs.targetUrl);
     }
 
@@ -104,6 +103,11 @@ public class FirstTest {
 
     @Test(priority = 4)
     public void FeedbackTest() throws IOException {
+        Wait<WebDriver> wait = new FluentWait<>(driver)
+                .withTimeout(10, SECONDS)
+                .pollingEvery(2, SECONDS)
+                .ignoring(NoSuchElementException.class);
+        WebElement element = wait.until(driver -> driver.findElement(By.className("ModelReviewsHome__NameModel")));
         String page = driver.getPageSource();
         String regexp = "<a class=\"ModelReviewsHome__NameModel\" href.*?>(.*?)</a>";
         Pattern pattern = Pattern.compile(regexp);
